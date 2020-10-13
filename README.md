@@ -1,6 +1,6 @@
 # mordred-descriptors
 
-Microservice that communicates with jaqpot-api and calculates the respective mordred descriptors
+Microservice that communicates with jaqpot-api and calculates the respective mordred descriptors.
 
 
 
