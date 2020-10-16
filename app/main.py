@@ -1,82 +1,13 @@
-from rdkit import Chem
-from mordred import Calculator, descriptors
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.responses import JSONResponse
-from typing import Optional, List
 import uvicorn
-
-
-# Calculation of mordred descriptors for a given smile
-def calculate_single(smile: str):
-    calc = Calculator(descriptors, ignore_3D=True)
-    mol = Chem.MolFromSmiles(smile)
-    return calc(mol)
-
-
-# Converts calculations string to a python dictionary
-def format_calculations(calculations: str):
-    calculations = calculations.replace("'", "")
-    dict1 = dict((x.strip(), y.strip())
-                 for x, y in (element.split(':')
-                              for element in calculations.split(', ')))
-    return dict1
-
-
-# Input model
-class EntryId(BaseModel):
-    name: str
-    ownerUUID: str
-    type: Optional[str] = None
-    URI: str
-
-
-class Features(BaseModel):
-    name: str
-    units: str
-    conditions: dict
-    category: str
-    key: str
-    uri: str
-
-
-class DataEntry(BaseModel):
-    entryId: Optional[EntryId] = None
-    values: dict
-
-
-class DataSet(BaseModel):
-    dataEntry: Optional[List[DataEntry]] = None
-    features: Optional[List[Features]] = None
-
-
-class Parameters(BaseModel):
-    categories: List[str]
-
-
-class Request(BaseModel):
-    dataset: Optional[DataSet] = None
-    parameters: Optional[Parameters] = None
-
-
-# Data Entry for output model
-class DataEntryOut:
-
-    def __init__(self, entryId, values):
-        self.entryId = entryId
-        self.values = values
-
-
-class FeaturesOut:
-    def __init__(self, name, conditions, category, uri):
-        self.name = name
-        self.conditions = conditions
-        self.category = category
-        self.uri = uri
+from calculations import calculate_single, format_calculations, get_descriptors
+from request_model import *
+from response_model import DataEntryOut, FeaturesOut
 
 
 app = FastAPI(
-    debug=True,
+    # debug=True,
     title="Mordred Descriptors API"
 )
 
@@ -109,13 +40,8 @@ async def apply_descriptor(request: Request):
 
     data_entry_out = [DataEntryOut(entryId={"name": s, "ownerUUID": None, "type": None, "URI": None},
                                    values=format_calculations(calculations[smiles.index(s)])) for s in smiles]
-    # Get all descriptor names
-    calc = Calculator(descriptors, ignore_3D=True)
-    mol = Chem.MolFromSmiles('c1ccccc1')
-    variable = calc(mol).asdict(False)
-    descriptor_names_list = []
-    for key, value in variable.items():
-        descriptor_names_list.append(key)
+
+    descriptor_names_list = get_descriptors()
 
     conditions_mordred = {
         "Implementation Vendor": "Molecular Descriptor Calculator",
@@ -130,7 +56,6 @@ async def apply_descriptor(request: Request):
     response_object = {
         "responseDataset": {
             "dataEntry": data_entry_out,
-            # "features": [{}],
             "features": features_out,
             "descriptors": ["CDK"]
         }
