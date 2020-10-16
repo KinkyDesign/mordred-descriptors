@@ -13,4 +13,6 @@ You can navigate to  http://127.0.0.1:8000/docs to interact with the Mordred Des
 
 Additional documentation can be found at  http://127.0.0.1:8000/redoc
  
-**Learn more about Mordred Descriptors** http://mordred-descriptor.github.io/documentation/master/index.html
+**Learn more about Mordred Descriptors** 
+
+http://mordred-descriptor.github.io/documentation/master/index.html
