@@ -6,7 +6,8 @@ from rdkit import Chem
 def calculate_single(smile: str):
     calc = Calculator(descriptors, ignore_3D=True)
     mol = Chem.MolFromSmiles(smile)
-    return calc(mol)
+    c = calc(mol).fill_missing(value="0")
+    return c
 
 
 # Converts calculations string to a python dictionary
