@@ -12,6 +12,15 @@ app = FastAPI(
 )
 
 
+@app.post("/mordred/{smile}")
+async def apply_descriptor_to_smile(smile: str):
+    """
+    Applies Mordred Descriptor on a given smile
+    """
+    # Convert Result to dict and return
+    return calculate_single(smile).asdict(rawkey=False)
+
+
 @app.post("/mordred")
 async def apply_descriptor(request: Request):
     """
